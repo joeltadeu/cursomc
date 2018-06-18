@@ -1,6 +1,7 @@
 package com.nelioalves.cursomc.domain;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.algaworks.brewer.model.ItemVenda;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
@@ -101,6 +103,10 @@ public class Pedido implements Serializable {
 
 	public void setItens(Set<ItemPedido> itens) {
 		this.itens = itens;
+	}
+	
+	public BigDecimal getTotal() {
+		return  getItens().stream().map(ItemPedido::getSubTotal).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
 	}
 
 	@Override
