@@ -17,6 +17,8 @@ import com.nelioalves.cursomc.repositories.PagamentoRepository;
 import com.nelioalves.cursomc.repositories.PedidoRepository;
 import com.nelioalves.cursomc.services.exceptions.ObjectNotFoundException;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+
 @Service
 public class PedidoService {
 
@@ -35,6 +37,9 @@ public class PedidoService {
 	@Autowired
 	private BoletoService boletoService;
 
+	@Autowired
+	private ClienteService clienteService;
+
 	public Pedido find(Integer id) {
 		Optional<Pedido> obj = repository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
@@ -45,6 +50,7 @@ public class PedidoService {
 	public Pedido insert(Pedido pedido) {
 		pedido.setId(null);
 		pedido.setInstante(new Date());
+		pedido.setCliente(clienteService.find(pedido.getCliente().getId()));
 		pedido.getPagamento().setEstado(EstadoPagamento.PENDENTE);
 		pedido.getPagamento().setPedido(pedido);
 		if (pedido.getPagamento() instanceof PagamentoComBoleto) {
@@ -56,10 +62,13 @@ public class PedidoService {
 		pagamentoRepository.save(pedido.getPagamento());
 		for (ItemPedido item : pedido.getItens()) {
 			item.setDesconto(BigDecimal.ZERO);
+			item.setProduto(produtoService.find(item.getProduto().getId()));
 			item.setPreco(produtoService.find(item.getProduto().getId()).getPreco());
 			item.setPedido(pedido);
 		}
 		itemPedidoRepository.saveAll(pedido.getItens());
+		
+		System.out.println(pedido);
 		return pedido;
 	}
 

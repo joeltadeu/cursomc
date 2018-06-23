@@ -2,8 +2,11 @@ package com.nelioalves.cursomc.domain;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -27,7 +30,7 @@ public class Pedido implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@JsonFormat(pattern="dd/MM/yyyy HH:mm")
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm")
 	private Date instante;
 
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "pedido")
@@ -103,9 +106,9 @@ public class Pedido implements Serializable {
 	public void setItens(Set<ItemPedido> itens) {
 		this.itens = itens;
 	}
-	
+
 	public BigDecimal getTotal() {
-		return  getItens().stream().map(ItemPedido::getSubTotal).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+		return getItens().stream().map(ItemPedido::getSubTotal).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
 	}
 
 	@Override
@@ -132,4 +135,26 @@ public class Pedido implements Serializable {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+		SimpleDateFormat sdf  new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+		builder.append("Pedido número:");
+		builder.append(getId());
+		builder.append(", Instante: ");
+		builder.append(getInstante());
+		builder.append(", Cliente: ");
+		builder.append(getCliente().getNome());
+		builder.append(", Situação do pagamento: ");
+		builder.append(getPagamento().getEstado().getDescricao());
+		builder.append("\nDetalhes:\n");
+		for (ItemPedido item : getItens()) {
+			builder.append(item.toString());
+		}
+		builder.append("Valor total: ");
+		builder.append(nf.format(getTotal()));
+		return builder.toString();
+	}
+
 }
