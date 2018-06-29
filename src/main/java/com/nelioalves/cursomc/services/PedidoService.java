@@ -17,8 +17,6 @@ import com.nelioalves.cursomc.repositories.PagamentoRepository;
 import com.nelioalves.cursomc.repositories.PedidoRepository;
 import com.nelioalves.cursomc.services.exceptions.ObjectNotFoundException;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
-
 @Service
 public class PedidoService {
 
@@ -39,6 +37,8 @@ public class PedidoService {
 
 	@Autowired
 	private ClienteService clienteService;
+	
+	@Autowired EmailService emailService;
 
 	public Pedido find(Integer id) {
 		Optional<Pedido> obj = repository.findById(id);
@@ -68,7 +68,8 @@ public class PedidoService {
 		}
 		itemPedidoRepository.saveAll(pedido.getItens());
 		
-		System.out.println(pedido);
+		emailService.sendOrderConfigmationEmail(pedido);
+		
 		return pedido;
 	}
 
